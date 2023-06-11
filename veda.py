@@ -1,8 +1,12 @@
 
+import matplotlib.pyplot as plt
+import seaborn as sns
+import plotly.express as px
+from matplotlib import colorbar
+import pandas as pd
 
 # set default configuration
 print(plt.style.available)
-plt.style.use("ggplot")
 
 
 def viz_missing(df: pd.DataFrame, fig_size: tuple[int, int] = (12, 6)) -> None:
@@ -18,16 +22,15 @@ def viz_missing(df: pd.DataFrame, fig_size: tuple[int, int] = (12, 6)) -> None:
     """
     # Select missing data
     na_df = df.isna()
-
+    
     # Calculate the missing data percentage
-    na_percent: pd.DataFrame = na_df.mean() * 100
+    na_percent: pd.DataFrame = 100 * na_df.mean()
 
     # Create a figure and two subplots
-    fig, (ax_bar, ax_heat) = plt.subplots(2, 1, figsize=(12, 6), sharex=True)
-
+    fig, (ax_bar, ax_heat) = plt.subplots(2, 1, figsize=fig_size, sharex=True)
     # region: Plot the missing data percentage on the first subplot
-    na_percent.plot(kind="bar", ax=ax_bar, fontsize=6, color="black", ylim=[0, 100])
-    ax_bar.grid(False, which="both", axis="both")
+    na_percent.plot(kind="bar", ax=ax_bar, fontsize=6, color="black", ylim=[0, 100], width=0.9)
+    ax_bar.grid(True, which="both", axis="both")
     ax_bar.tick_params(axis="both", which="both", labelsize=6, length=0)
     ax_bar.set_ylabel("% of Missing Values")
     ax_bar.set_title("Missing Values Analysis")
@@ -45,9 +48,6 @@ def viz_missing(df: pd.DataFrame, fig_size: tuple[int, int] = (12, 6)) -> None:
     # Display the plot
     plt.show()
 
-
-from matplotlib import colorbar
-import plotly.express as px
 
 
 def viz_missing_interactive(
