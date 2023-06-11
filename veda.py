@@ -1,4 +1,3 @@
-
 import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.express as px
@@ -22,32 +21,30 @@ def viz_missing(df: pd.DataFrame, fig_size: tuple[int, int] = (12, 6)) -> None:
     """
     # Select missing data
     na_df = df.isna()
-    
+
     # Calculate the missing data percentage
     na_percent: pd.DataFrame = 100 * na_df.mean()
-
     # Create a figure and two subplots
-    fig, (ax_bar, ax_heat) = plt.subplots(2, 1, figsize=fig_size, sharex=True)
+    fig, (ax_bar, ax_heat) = plt.subplots(2, 1, figsize=fig_size, sharex=False)
     # region: Plot the missing data percentage on the first subplot
-    na_percent.plot(kind="bar", ax=ax_bar, fontsize=6, color="black", ylim=[0, 100], width=0.9)
+    na_percent.plot(
+        kind="bar", ax=ax_bar, fontsize=6, color="black", ylim=[0, 100], width=0.5
+    )
     ax_bar.grid(True, which="both", axis="both")
-    ax_bar.tick_params(axis="both", which="both", labelsize=6, length=0)
+    # ax_bar.set_xticks([])
+    ax_bar.tick_params(axis="both", which="both", labelsize=6, length=2)
     ax_bar.set_ylabel("% of Missing Values")
     ax_bar.set_title("Missing Values Analysis")
     # endregion
-
     # region Plot the missing data heatmap on the second subplot
     sns.heatmap(na_df, cmap="binary", cbar=False, square=False, ax=ax_heat)
     ax_heat.tick_params(axis="both", which="major", labelsize=6, length=0)
     ax_heat.set_xlabel("Features")
     # endregion
-
     # Adjust the spacing between subplots
     fig.subplots_adjust(wspace=0.1)
-
     # Display the plot
     plt.show()
-
 
 
 def viz_missing_interactive(
@@ -88,12 +85,14 @@ def viz_missing_interactive(
         return fig_bar, fig_heat
     else:
         # Display the plots
-        fig_heat.show()
         fig_bar.show()
-        
-        
+        fig_heat.show()
+
+
 # create a figure with two subplots
-def viz_distribution(data: pd.DataFrame, x_target: str, use_density: bool = False):
+def viz_distribution(
+    data: pd.DataFrame, x_target: str, use_density: bool = False, cumulate=False
+):
     sns.set_style("dark")  # darkgrid, whitegrid, dark, white, ticks)
     fig, (ax_hist, ax_box) = plt.subplots(
         nrows=2, sharex=True, gridspec_kw={"height_ratios": (0.8, 0.2)}
@@ -102,7 +101,9 @@ def viz_distribution(data: pd.DataFrame, x_target: str, use_density: bool = Fals
     sns.histplot(
         data,
         x=x_target,
+        bins="auto",
         ax=ax_hist,
+        cumulative=cumulate,
         kde=use_density,
     )
 
@@ -116,15 +117,16 @@ def viz_distribution(data: pd.DataFrame, x_target: str, use_density: bool = Fals
     plt.show()
 
 
-
-def viz_correlations(data: pd.DataFrame, corr_method: str = "pearson", cutoff=0.0):
+def viz_correlations(
+    data: pd.DataFrame, corr_method: str = "pearson", cutoff=0.0, fig_size=(9, 9)
+):
     corr_matrix = data.corr(numeric_only=True, method=corr_method)  # type: ignore
     # drop all features with no correlation values
     corr_matrix = corr_matrix.dropna(how="all", axis="columns").dropna(
         how="all", axis="index"
     )
     mask = corr_matrix.abs() >= cutoff
-    plt.figure(figsize=(9, 9))
+    plt.figure(figsize=fig_size)
     sns.set_style("white")
     ax = sns.heatmap(
         data=corr_matrix,
@@ -136,21 +138,23 @@ def viz_correlations(data: pd.DataFrame, corr_method: str = "pearson", cutoff=0.
         linewidths=0.1,
         cmap="RdYlGn",
         cbar_kws={"shrink": 0.8},
-        annot_kws={'fontsize':8},
+        annot_kws={"fontsize": 8},
     )
     ax.set_title("Correlation Matrix")
     ax.set_xlabel("")
     ax.set_ylabel("")
 
 
-def viz_clusters_correlations(data: pd.DataFrame, corr_method="pearson", cutoff=0.0):
+def viz_clusters_correlations(
+    data: pd.DataFrame, corr_method="pearson", cutoff=0.0, fig_size=(9, 9)
+):
     corr_matrix = data.corr(numeric_only=True, method=corr_method)
     # drop all features with no correlation values
     corr_matrix = corr_matrix.dropna(how="all", axis="columns").dropna(
         how="all", axis="index"
     )
     mask = corr_matrix.abs() >= cutoff
-    plt.figure(figsize=(9, 9))
+    plt.figure(figsize=fig_size)
     sns.set_style("white")
     ax = sns.clustermap(
         data=corr_matrix,
