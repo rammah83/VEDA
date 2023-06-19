@@ -167,3 +167,7 @@ def viz_clusters_correlations(
         cmap="RdYlGn",
         cbar_kws={"shrink": 0.8},
     )
+
+
+def viz_scatter(df: pd.DataFrame):
+    raise NotImplementedError
