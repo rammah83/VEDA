@@ -30,7 +30,7 @@ def viz_missing(df: pd.DataFrame, fig_size: tuple[int, int] = (12, 6)) -> None:
     na_percent.plot(
         kind="bar", ax=ax_bar, fontsize=6, color="black", ylim=[0, 100], width=0.5
     )
-    ax_bar.grid(True, which="both", axis="both")
+    ax_bar.grid(False, which="both", axis="both")
     # ax_bar.set_xticks([])
     ax_bar.tick_params(axis="both", which="both", labelsize=6, length=2)
     ax_bar.set_ylabel("% of Missing Values")
@@ -40,6 +40,7 @@ def viz_missing(df: pd.DataFrame, fig_size: tuple[int, int] = (12, 6)) -> None:
     sns.heatmap(na_df, cmap="binary", cbar=False, square=False, ax=ax_heat)
     ax_heat.tick_params(axis="both", which="major", labelsize=6, length=0)
     ax_heat.set_xlabel("Features")
+    ax_heat.set_ylabel("Index")
     # endregion
     # Adjust the spacing between subplots
     fig.subplots_adjust(wspace=0.1)
@@ -49,7 +50,7 @@ def viz_missing(df: pd.DataFrame, fig_size: tuple[int, int] = (12, 6)) -> None:
 
 def viz_missing_interactive(
     df: pd.DataFrame, fig_size: tuple[int, int] = (1280, 500), return_fig=False
-) -> tuple[px.bar, px.imshow]:
+) -> tuple[px.bar, px.imshow] | None:
     """
     Visualize missing data percentage and heatmap.
 
@@ -75,6 +76,8 @@ def viz_missing_interactive(
     fig_heat = px.imshow(df.isna(), color_continuous_scale=["white", "black"])
     fig_heat.update_layout(
         title="Missing Data Heatmap",
+        xaxis_title="Features",
+        yaxis_title="Index",
         coloraxis_showscale=False,
         width=fig_size[0],
         height=fig_size[1],
@@ -87,17 +90,61 @@ def viz_missing_interactive(
         # Display the plots
         fig_bar.show()
         fig_heat.show()
+        return None
 
 
 # create a figure with two subplots
 def viz_distribution(
     data: pd.DataFrame, x_target: str, use_density: bool = False, cumulate=False
 ):
+    """Display distribution using histogram and boxplot
+
+    Args:
+        data (pd.DataFrame): data frame to vizualize distrubitions
+        x_target (str): _description_
+        use_density (bool, optional): _description_. Defaults to False.
+        cumulate (bool, optional): _description_. Defaults to False.
+    """
     sns.set_style("dark")  # darkgrid, whitegrid, dark, white, ticks)
     fig, (ax_hist, ax_box) = plt.subplots(
-        nrows=2, sharex=True, gridspec_kw={"height_ratios": (0.8, 0.2)}
+        nrows=2, sharex=True, gridspec_kw={"height_ratios": (0.9, 0.3)}
     )
 
+    # Plot mean line and median line
+    x_mean = data[x_target].mean()
+    x_median = data[x_target].median()
+    ax_hist.axvline(
+        x_mean,
+        color="black",
+        linestyle=":",
+        linewidth=2,
+    )
+    ax_hist.axvline(
+        x_median,
+        color="black",
+        linestyle="--",
+        linewidth=2,
+    )
+    # Add annotations for mean and median
+    ax_hist.annotate(
+        "Mean",
+        xy=(x_mean, 0),
+        xytext=(x_mean + 0.1, 0),
+        arrowprops=dict(
+            facecolor="black",
+            arrowstyle="fancy",
+        ),
+    )
+
+    ax_hist.annotate(
+        "Median",
+        xy=(x_median, 50),
+        xytext=(x_median + 0.1, 50),
+        arrowprops=dict(
+            facecolor="black",
+            arrowstyle="fancy",
+        ),
+    )
     sns.histplot(
         data,
         x=x_target,
