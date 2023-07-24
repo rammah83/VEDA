@@ -95,7 +95,11 @@ def viz_missing_interactive(
 
 # create a figure with two subplots
 def viz_distribution(
-    data: pd.DataFrame, x_target: str, use_density: bool = False, cumulate=False
+    data: pd.DataFrame,
+    x_target: str,
+    fig_size=(12, 6),
+    use_density: bool = False,
+    cumulate=False,
 ):
     """Display distribution using histogram and boxplot
 
@@ -107,22 +111,25 @@ def viz_distribution(
     """
     sns.set_style("dark")  # darkgrid, whitegrid, dark, white, ticks)
     fig, (ax_hist, ax_box) = plt.subplots(
-        nrows=2, sharex=True, gridspec_kw={"height_ratios": (0.9, 0.3)}
+        figsize=fig_size,
+        nrows=2,
+        sharex=True,
+        gridspec_kw={"height_ratios": (0.9, 0.3)},
     )
 
-    # Plot mean line and median line
+    # region: Plot & annotate mean line and median line
     x_mean = data[x_target].mean()
     x_median = data[x_target].median()
     ax_hist.axvline(
         x_mean,
         color="black",
-        linestyle=":",
+        linestyle="--",
         linewidth=2,
     )
     ax_hist.axvline(
         x_median,
         color="black",
-        linestyle="--",
+        linestyle="-",
         linewidth=2,
     )
     # Add annotations for mean and median
@@ -145,6 +152,8 @@ def viz_distribution(
             arrowstyle="fancy",
         ),
     )
+    # endregion
+
     sns.histplot(
         data,
         x=x_target,
@@ -153,6 +162,7 @@ def viz_distribution(
         cumulative=cumulate,
         kde=use_density,
     )
+    # alernative : data.hist(column=x_target, ax=ax_hist, bins="auto", density=True)
 
     # plot the boxplot on the top subplot
     sns.boxplot(data, x=x_target, ax=ax_box, orient="h")
@@ -165,15 +175,16 @@ def viz_distribution(
 
 
 def viz_correlations(
-    data: pd.DataFrame, corr_method: str = "pearson", cutoff=0.0, fig_size=(9, 9)
+    data: pd.DataFrame, corr_method: str = "pearson", cutoff=0.0, fig_size=9
 ):
     corr_matrix = data.corr(numeric_only=True, method=corr_method)  # type: ignore
     # drop all features with no correlation values
     corr_matrix = corr_matrix.dropna(how="all", axis="columns").dropna(
-        how="all", axis="index"
+        how="all",
+        axis="index",
     )
     mask = corr_matrix.abs() >= cutoff
-    plt.figure(figsize=fig_size)
+    plt.figure(figsize=(fig_size, fig_size))
     sns.set_style("white")
     ax = sns.heatmap(
         data=corr_matrix,
@@ -193,7 +204,7 @@ def viz_correlations(
 
 
 def viz_clusters_correlations(
-    data: pd.DataFrame, corr_method="pearson", cutoff=0.0, fig_size=(9, 9)
+    data: pd.DataFrame, corr_method="pearson", cutoff=0.0, fig_size=(7, 7)
 ):
     corr_matrix = data.corr(numeric_only=True, method=corr_method)
     # drop all features with no correlation values
@@ -210,7 +221,7 @@ def viz_clusters_correlations(
         annot=True,
         fmt=".2f",
         vmin=-1,
-        linewidths=0.1,
+        linewidths=0.05,
         cmap="RdYlGn",
         cbar_kws={"shrink": 0.8},
     )
