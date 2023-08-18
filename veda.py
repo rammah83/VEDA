@@ -203,6 +203,30 @@ def viz_correlations(
     ax.set_ylabel("")
 
 
+def viz_correlation_interactive(
+    data, corr_method="pearson", cutoff=0.0, fig_size=(680, 680)
+):
+    corr_matrix = data.corr(numeric_only=True, method=corr_method)
+    corr_matrix = corr_matrix.dropna(how="all", axis="columns").dropna(
+        how="all", axis="index"
+    )
+    mask = corr_matrix.abs() >= cutoff
+    fig_heat = px.imshow(
+        corr_matrix, text_auto=".2f", color_continuous_scale="RdYlGn", zmin=-1, zmax=1
+    )
+    fig_heat.update_layout(
+        title="Correlation Matrix Heatmap",
+        xaxis_title="Features",
+        yaxis_title="Features",
+        width=fig_size[0],
+        height=fig_size[1],
+    )
+    fig_heat.update_traces(showscale=True, colorbar=dict(title="Correlation"))
+    fig_heat.update_xaxes(side="top")
+
+    fig_heat.show()
+
+
 def viz_clusters_correlations(
     data: pd.DataFrame, corr_method="pearson", cutoff=0.0, fig_size=(7, 7)
 ):
@@ -225,28 +249,6 @@ def viz_clusters_correlations(
         cmap="RdYlGn",
         cbar_kws={"shrink": 0.8},
     )
-
-
-def viz_correlation_interactive(
-    data, corr_method="pearson", cutoff=0.0, fig_size=(280, 280)
-):
-    corr_matrix = data.corr(numeric_only=True, method=corr_method)
-    corr_matrix = corr_matrix.dropna(how="all", axis="columns").dropna(
-        how="all", axis="index"
-    )
-    mask = corr_matrix.abs() >= cutoff
-    fig_heat = px.imshow(corr_matrix, color_continuous_scale="RdYlGn", zmin=-1, zmax=1)
-    fig_heat.update_layout(
-        title="Correlation Matrix Heatmap",
-        xaxis_title="Features",
-        yaxis_title="Features",
-        width=fig_size[0],
-        height=fig_size[1],
-    )
-    fig_heat.update_traces(showscale=True, colorbar=dict(title="Correlation"))
-    fig_heat.update_xaxes(side="top")
-
-    fig_heat.show()
 
 
 def viz_scatter(df: pd.DataFrame):
